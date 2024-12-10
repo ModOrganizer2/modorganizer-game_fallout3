@@ -49,6 +49,9 @@ protected:
   virtual QString savegameExtension() const override;
   virtual QString savegameSEExtension() const override;
   std::shared_ptr<const GamebryoSaveGame> makeSaveGame(QString filePath) const override;
+
+private:
+  void checkVariants();
 };
 
 #endif  // GAMEFALLOUT3_H
