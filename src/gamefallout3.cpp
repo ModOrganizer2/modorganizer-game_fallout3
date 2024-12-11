@@ -51,7 +51,9 @@ bool GameFallout3::init(IOrganizer* moInfo)
 
 void GameFallout3::checkVariants()
 {
-  if (QFile::exists(m_GamePath + "/Galaxy.dll")) {
+  if (QFile::exists(m_GamePath + "/Fallout3ng.exe")) {
+    setGameVariant("Low Violence");
+  } else if (QFile::exists(m_GamePath + "/Galaxy.dll")) {
     setGameVariant("GOG");
   } else if (QFile::exists(m_GamePath + "/FalloutLauncherEpic.exe")) {
     setGameVariant("Epic Games");
@@ -214,7 +216,17 @@ QStringList GameFallout3::primaryPlugins() const
 
 QStringList GameFallout3::gameVariants() const
 {
-  return {"Steam (Regular)", "Steam (Game Of The Year)", "Epic Games", "GOG"};
+  return {"Steam (Regular)", "Steam (Game Of The Year)", "Epic Games", "GOG",
+          "Low Violence"};
+}
+
+QString GameFallout3::binaryName() const
+{
+  if (selectedVariant() == "Low Violence") {
+    return "Fallout3ng.exe";
+  } else {
+    return GameGamebryo::binaryName();
+  }
 }
 
 QString GameFallout3::gameShortName() const
@@ -260,7 +272,8 @@ QString GameFallout3::getLauncherName() const
       {"Steam (Regular)", "Fallout3Launcher.exe"},
       {"Steam (Game of the Year)", "Fallout3Launcher.exe"},
       {"Epic Games", "FalloutLauncherEpic.exe"},
-      {"GOG", "FalloutLauncher.exe"}};
+      {"GOG", "FalloutLauncher.exe"},
+      {"Low Violence", "Fallout3Launcher.exe"}};
 
   return names.value(selectedVariant());
 }
