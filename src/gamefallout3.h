@@ -52,7 +52,7 @@ protected:
   std::shared_ptr<const GamebryoSaveGame> makeSaveGame(QString filePath) const override;
 
 private:
-  void checkVariants();
+  QString identifyVariant() const;
 };
 
 #endif  // GAMEFALLOUT3_H

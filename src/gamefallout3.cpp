@@ -49,18 +49,18 @@ bool GameFallout3::init(IOrganizer* moInfo)
   return true;
 }
 
-void GameFallout3::checkVariants()
+QString GameFallout3::identifyVariant() const
 {
   if (QFile::exists(m_GamePath + "/Fallout3ng.exe")) {
-    setGameVariant("Low Violence");
+    return "Low Violence";
   } else if (QFile::exists(m_GamePath + "/Galaxy.dll")) {
-    setGameVariant("GOG");
+    return "GOG";
   } else if (QFile::exists(m_GamePath + "/FalloutLauncherEpic.exe")) {
-    setGameVariant("Epic Games");
+    return "Epic Games";
   } else if (m_GamePath.endsWith("Fallout 3 goty")) {
-    setGameVariant("Steam (Game of the Year)");
+    return "Steam (Game of the Year)";
   } else {
-    setGameVariant("Steam (Regular)");
+    return "Steam (Regular)";
   }
 }
 
@@ -103,7 +103,7 @@ QString GameFallout3::gameName() const
 void GameFallout3::detectGame()
 {
   m_GamePath = identifyGamePath();
-  checkVariants();
+  setGameVariant(identifyVariant());
   m_MyGamesPath = determineMyGamesPath("Fallout3");
 }
 
