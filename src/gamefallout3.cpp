@@ -49,10 +49,32 @@ bool GameFallout3::init(IOrganizer* moInfo)
   return true;
 }
 
+QString GameFallout3::identifyVariant() const
+{
+  if (QFile::exists(m_GamePath + "/Fallout3ng.exe")) {
+    return "Low Violence";
+  } else if (QFile::exists(m_GamePath + "/Galaxy.dll")) {
+    return "GOG";
+  } else if (QFile::exists(m_GamePath + "/FalloutLauncherEpic.exe")) {
+    return "Epic Games";
+  } else if (m_GamePath.endsWith("Fallout 3 goty")) {
+    return "Steam (Game of the Year)";
+  } else {
+    return "Steam (Regular)";
+  }
+}
+
 QString GameFallout3::identifyGamePath() const
 {
-  auto result = GameGamebryo::identifyGamePath();  // Default registry path
-  // EPIC Game Store
+  // Steam (Regular)
+  auto result = parseSteamLocation("22300", "Fallout 3");
+
+  // Steam (Game of the Year)
+  if (result.isEmpty()) {
+    result = parseSteamLocation("22370", "Fallout 3 goty");
+  }
+
+  // Epic Games
   if (result.isEmpty()) {
     // Fallout 3: Game of the Year Edition: adeae8bbfc94427db57c7dfecce3f1d4
     result = parseEpicGamesLocation({"adeae8bbfc94427db57c7dfecce3f1d4"});
@@ -64,6 +86,12 @@ QString GameFallout3::identifyGamePath() const
         result = startPath.absoluteFilePath(subDirs.first());
     }
   }
+
+  // GOG (and Steam)
+  if (result.isEmpty()) {
+    result = GameGamebryo::identifyGamePath();
+  }
+
   return result;
 }
 
@@ -74,7 +102,8 @@ QString GameFallout3::gameName() const
 
 void GameFallout3::detectGame()
 {
-  m_GamePath    = identifyGamePath();
+  m_GamePath = identifyGamePath();
+  setGameVariant(identifyVariant());
   m_MyGamesPath = determineMyGamesPath("Fallout3");
 }
 
@@ -171,10 +200,12 @@ GameFallout3::makeSaveGame(QString filePath) const
 
 QString GameFallout3::steamAPPId() const
 {
-  if (selectedVariant() == "Game Of The Year") {
+  if (selectedVariant() == "Steam (Game Of The Year)") {
     return "22370";
-  } else {
+  } else if (selectedVariant() == "Steam (Regular)") {
     return "22300";
+  } else {
+    return "";
   }
 }
 
@@ -185,7 +216,17 @@ QStringList GameFallout3::primaryPlugins() const
 
 QStringList GameFallout3::gameVariants() const
 {
-  return {"Regular", "Game Of The Year"};
+  return {"Steam (Regular)", "Steam (Game Of The Year)", "Epic Games", "GOG",
+          "Low Violence"};
+}
+
+QString GameFallout3::binaryName() const
+{
+  if (selectedVariant() == "Low Violence") {
+    return "Fallout3ng.exe";
+  } else {
+    return GameGamebryo::binaryName();
+  }
 }
 
 QString GameFallout3::gameShortName() const
@@ -205,8 +246,8 @@ QString GameFallout3::gameNexusName() const
 
 QStringList GameFallout3::iniFiles() const
 {
-  return {"fallout.ini",       "falloutprefs.ini", "custom.ini",
-          "FalloutCustom.ini", "GECKCustom.ini",   "GECKPrefs.ini"};
+  return {"fallout.ini", "falloutprefs.ini", "FalloutCustom.ini", "GECKCustom.ini",
+          "GECKPrefs.ini"};
 }
 
 QStringList GameFallout3::DLCPlugins() const
@@ -227,5 +268,12 @@ int GameFallout3::nexusGameID() const
 
 QString GameFallout3::getLauncherName() const
 {
-  return "FalloutLauncher.exe";
+  const QMap<QString, QString> names = {
+      {"Steam (Regular)", "Fallout3Launcher.exe"},
+      {"Steam (Game of the Year)", "Fallout3Launcher.exe"},
+      {"Epic Games", "FalloutLauncherEpic.exe"},
+      {"GOG", "FalloutLauncher.exe"},
+      {"Low Violence", "Fallout3Launcher.exe"}};
+
+  return names.value(selectedVariant());
 }

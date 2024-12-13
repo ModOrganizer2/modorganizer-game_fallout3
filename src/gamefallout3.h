@@ -27,6 +27,7 @@ public:  // IPluginGame interface
   virtual QString steamAPPId() const override;
   virtual QStringList primaryPlugins() const override;
   virtual QStringList gameVariants() const;
+  QString binaryName() const override;
   virtual QString gameShortName() const override;
   virtual QStringList validShortNames() const override;
   virtual QString gameNexusName() const override;
@@ -49,6 +50,9 @@ protected:
   virtual QString savegameExtension() const override;
   virtual QString savegameSEExtension() const override;
   std::shared_ptr<const GamebryoSaveGame> makeSaveGame(QString filePath) const override;
+
+private:
+  QString identifyVariant() const;
 };
 
 #endif  // GAMEFALLOUT3_H
